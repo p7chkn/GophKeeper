@@ -2,18 +2,29 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	grpc_client "new_diplom_client/grpc-client"
 	"new_diplom_client/handlers"
 	"new_diplom_client/loops"
+	"os"
 )
 
 var (
 	BuildTime  string
 	AppVersion string
+	address    string
 )
 
-const address = "localhost:50051"
+const defaultAddress = "localhost:50051"
+
+func init() {
+	envAddress := os.Getenv("ADDRESS")
+	if envAddress != "" {
+		address = envAddress
+	}
+	address = *flag.String("a", defaultAddress, "address of gGRPC server")
+}
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
