@@ -1,3 +1,4 @@
+// Package setup пакет для подготовки сущностей
 package setup
 
 import (
@@ -9,6 +10,7 @@ import (
 	"runtime"
 )
 
+// MustSetupDatabase функия по инициализации базы данных
 func MustSetupDatabase(db *sql.DB) error {
 	log.Println("Enter a migrations start")
 	_, b, _, _ := runtime.Caller(0)

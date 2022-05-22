@@ -1,3 +1,4 @@
+// Package authorization пакет для авторизации
 package authorization
 
 import (
@@ -10,10 +11,7 @@ import (
 	"time"
 )
 
-type RefreshTokenData struct {
-	RefreshToken string `json:"refresh_token"`
-}
-
+// TokenDetails - сущность для хранения информации о токенах
 type TokenDetails struct {
 	AccessToken  string
 	RefreshToken string
@@ -21,6 +19,7 @@ type TokenDetails struct {
 	RtExpires    int64
 }
 
+// CreateToken фнукция создания токена по пользовательскому id
 func CreateToken(userID string, accessTokenLiveTimeMinutes int, refreshTokenLiveTimeDays int,
 	accessTokenSecret string, refreshTokenSecret string) (*TokenDetails, error) {
 	td := &TokenDetails{}
@@ -48,6 +47,7 @@ func CreateToken(userID string, accessTokenLiveTimeMinutes int, refreshTokenLive
 	return td, nil
 }
 
+// VerifyToken - фукнция проверки токена
 func VerifyToken(ctx context.Context, accessSecret string) (*jwt.Token, error) {
 	tokenString := ExtractToken(ctx)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -62,6 +62,7 @@ func VerifyToken(ctx context.Context, accessSecret string) (*jwt.Token, error) {
 	return token, nil
 }
 
+// TokenValid функция проверки валидности токена
 func TokenValid(ctx context.Context, accessSecret string) (string, error) {
 	token, err := VerifyToken(ctx, accessSecret)
 	if err != nil {
@@ -84,6 +85,7 @@ func ExtractToken(ctx context.Context) string {
 	return ""
 }
 
+// RefreshToken функция для выдачи новых токенов, по токену для обновления
 func RefreshToken(refresh string, accessTokenLiveTimeMinutes int, refreshTokenLiveTimeDays int,
 	accessTokenSecret string, refreshTokenSecret string) (*TokenDetails, error) {
 

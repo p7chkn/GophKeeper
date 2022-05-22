@@ -1,3 +1,4 @@
+// Package models пакет для хранения моделей
 package models
 
 import (
@@ -17,6 +18,7 @@ var (
 	nonce = []byte{161, 154, 38, 17, 9, 137, 119, 105, 204, 99, 67, 14}
 )
 
+// NewRawSecretData функия для создания нового объекта зашифрованного секрета
 func NewRawSecretData(secret Secret) (*RawSecretData, error) {
 	err := secret.Data.Validate()
 	if err != nil {
@@ -46,12 +48,14 @@ func NewRawSecretData(secret Secret) (*RawSecretData, error) {
 	return &rsd, err
 }
 
+// RawSecretData структура зашифрованного секрета
 type RawSecretData struct {
 	ID     string `db:"id"`
 	UserID string `db:"user_id"`
 	Data   []byte `db:"secret_data"`
 }
 
+// DecryptToSecretData функция расшифровки секрета в обычную структуру секрета
 func (rd *RawSecretData) DecryptToSecretData() (*SecretData, error) {
 	aesblock, err := aes.NewCipher(key)
 	if err != nil {
@@ -66,10 +70,10 @@ func (rd *RawSecretData) DecryptToSecretData() (*SecretData, error) {
 		return nil, err
 	}
 	rd.Data = decryptData
-	return rd.TurnToSecretData()
+	return rd.turnToSecretData()
 }
 
-func (rd *RawSecretData) TurnToSecretData() (*SecretData, error) {
+func (rd *RawSecretData) turnToSecretData() (*SecretData, error) {
 
 	result := SecretData{}
 	err := json.Unmarshal(rd.Data, &result)
@@ -80,6 +84,7 @@ func (rd *RawSecretData) TurnToSecretData() (*SecretData, error) {
 	return &result, err
 }
 
+// Encrypt функция зашифровки секрета
 func (rd *RawSecretData) Encrypt() error {
 	aesblock, err := aes.NewCipher(key)
 	if err != nil {
@@ -94,11 +99,13 @@ func (rd *RawSecretData) Encrypt() error {
 	return nil
 }
 
+// Secret структура хранения секрета
 type Secret struct {
 	User string     `db:"user_id"`
 	Data SecretData `db:"secret_data"`
 }
 
+// SecretData структура для хранения данных секрета
 type SecretData struct {
 	ID         string `json:"id"`
 	Type       string `json:"type"`
@@ -106,6 +113,7 @@ type SecretData struct {
 	UsefulData map[string]string
 }
 
+// UnmarshalJSON функция десереализации данных секрета
 func (sd *SecretData) UnmarshalJSON(data []byte) error {
 	type SecretDataAlias SecretData
 
@@ -124,6 +132,7 @@ func (sd *SecretData) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// Validate функия валидации данных секрета
 func (sd *SecretData) Validate() error {
 	switch sd.Type {
 	case "binary":
@@ -138,28 +147,6 @@ func (sd *SecretData) Validate() error {
 		return customerrors.NewCustomError(errors.New("wrong type of secret"), "wrong type")
 	}
 }
-
-//
-//func (sd *SecretData) Encrypt() ([]byte, error) {
-//	data, err := json.Marshal(sd)
-//	if err != nil {
-//		return data, err
-//	}
-//	aesblock, err := aes.NewCipher(key)
-//	if err != nil {
-//		return data, err
-//	}
-//	aesgcm, err := cipher.NewGCM(aesblock)
-//	if err != nil {
-//		return data, err
-//	}
-//	if err != nil {
-//		return data, err
-//	}
-//	encryptData := aesgcm.Seal(nil, nonce, data, nil)
-//
-//	return encryptData, err
-//}
 
 func (sd *SecretData) validateBinary() error {
 	return sd.checkUsefulData([]string{"binary"})

@@ -1,3 +1,4 @@
+// Package handlers пакет для храрнения gRPC обработчиков
 package handlers
 
 import (
@@ -7,19 +8,21 @@ import (
 	"new_diplom/pb"
 )
 
+// NewGrpcUsers функция создания обраточка запросов для пользователей
 func NewGrpcUsers(userService UserServiceInterface) *GrpcUsers {
 	return &GrpcUsers{
 		userService: userService,
 	}
 }
 
+// GrpcUsers структура для обраточика запросов для пользователя
 type GrpcUsers struct {
 	pb.UnimplementedUsersServer
 	userService UserServiceInterface
 }
 
+// CreateUser функция создания нового пользователя
 func (gh *GrpcUsers) CreateUser(ctx context.Context, in *pb.CreateUserRequest) (*pb.TokenResponse, error) {
-	//fmt.Println(ctx.Value("userID"))
 	user := models.User{
 		Login:    in.Login,
 		Password: in.Password,
@@ -43,6 +46,7 @@ func (gh *GrpcUsers) CreateUser(ctx context.Context, in *pb.CreateUserRequest) (
 	}, nil
 }
 
+// AuthUser функция авторизации пользователя
 func (gh *GrpcUsers) AuthUser(ctx context.Context, in *pb.AuthUserRequest) (*pb.TokenResponse, error) {
 	user := models.User{
 		Login:    in.Login,
@@ -61,6 +65,7 @@ func (gh *GrpcUsers) AuthUser(ctx context.Context, in *pb.AuthUserRequest) (*pb.
 	}, nil
 }
 
+// RefreshToken функция для обновления токена пользователя
 func (gh *GrpcUsers) RefreshToken(ctx context.Context, in *pb.RefreshTokenRequest) (*pb.TokenResponse, error) {
 	tokens, err := gh.userService.RefreshToken(ctx, in.RefreshToken)
 	if err != nil {

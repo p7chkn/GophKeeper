@@ -1,3 +1,4 @@
+// Package grpc_client пакет gRPC клиентов
 package grpc_client
 
 import (
@@ -11,6 +12,7 @@ import (
 	"new_diplom_client/pb"
 )
 
+// NewSecretClient функция создания gRPC клиента для работы с секретами
 func NewSecretClient(address string, access string, refresh string, userClient *UserClient) *SecretClient {
 	return &SecretClient{
 		address:      address,
@@ -25,6 +27,7 @@ type gRPCClient struct {
 	closeFunc func() error
 }
 
+// SecretClient структура клиента для работы с секретами
 type SecretClient struct {
 	address      string
 	accessToken  string
@@ -32,6 +35,7 @@ type SecretClient struct {
 	userClient   *UserClient
 }
 
+// GetSecrets функция получения секретов пользователя
 func (c *SecretClient) GetSecrets(ctx context.Context) ([]models.Secret, error) {
 	client, err := c.getConn()
 	if err != nil {
@@ -72,6 +76,7 @@ func (c *SecretClient) GetSecrets(ctx context.Context) ([]models.Secret, error) 
 	return result, nil
 }
 
+// CreateSecret функция создания секрета
 func (c *SecretClient) CreateSecret(ctx context.Context, secret models.Secret) error {
 	client, err := c.getConn()
 	if err != nil {
@@ -110,10 +115,6 @@ func (c *SecretClient) tryToRefreshToken(ctx context.Context) error {
 	}
 	c.accessToken = access
 	c.refreshToken = refresh
-	return nil
-}
-
-func (c *SecretClient) DeleteSecret(secretID string) error {
 	return nil
 }
 

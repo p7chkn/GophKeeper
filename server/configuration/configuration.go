@@ -15,6 +15,7 @@ const (
 	RefreshTokenSecret         = "mcmvmkmsdnfsdmfdsjf"
 )
 
+// NewConfig функция для создания нового экземпляра конфигурации
 func NewConfig() *Config {
 	cfg := Config{
 		PostgresString:             PostgresString,
@@ -42,6 +43,7 @@ func NewConfig() *Config {
 	return &cfg
 }
 
+// Config струкутра для хранения конфигурации
 type Config struct {
 	PostgresString             string `env:"POSTGRES_STRING"`
 	GrpcPort                   int    `env:"GRPC_PORT"`

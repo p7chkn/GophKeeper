@@ -1,3 +1,4 @@
+// Package database пакет для работы с базами данных
 package database
 
 import (
@@ -9,16 +10,19 @@ import (
 	"new_diplom/models"
 )
 
+// NewPostgresDataBase функция по созданию нового объекта для работы с базой данных
 func NewPostgresDataBase(conn *sqlx.DB) *PostgresDataBase {
 	return &PostgresDataBase{
 		conn: conn,
 	}
 }
 
+// PostgresDataBase структура данных для подключения к базе данных
 type PostgresDataBase struct {
 	conn *sqlx.DB
 }
 
+// CreateUser функция для создание пользователя по модели пользователя
 func (pg *PostgresDataBase) CreateUser(ctx context.Context, user models.User) error {
 
 	_, err := pg.conn.ExecContext(ctx, "INSERT INTO users (login, password) VALUES ($1, crypt($2, gen_salt('bf', 8)))",
@@ -31,6 +35,7 @@ func (pg *PostgresDataBase) CreateUser(ctx context.Context, user models.User) er
 	return err
 }
 
+// CheckUserPassword функция проверки соответствия пароля, возвращает так же id пользователя
 func (pg *PostgresDataBase) CheckUserPassword(ctx context.Context, user models.User) (string, error) {
 	var result string
 	query, err := pg.conn.QueryxContext(ctx, `SELECT id FROM users WHERE login = $1 
@@ -47,6 +52,7 @@ func (pg *PostgresDataBase) CheckUserPassword(ctx context.Context, user models.U
 	return result, err
 }
 
+// DeleteUser функция удаления пользователя
 func (pg *PostgresDataBase) DeleteUser(ctx context.Context, userID string) error {
 	_, err := pg.conn.ExecContext(ctx, `UPDATE users SET deleted_at = current_timestamp WHERE id = $1`, userID)
 	if err != nil {
@@ -55,6 +61,7 @@ func (pg *PostgresDataBase) DeleteUser(ctx context.Context, userID string) error
 	return nil
 }
 
+// AddSecret функция дл добавления секрета пользователя
 func (pg *PostgresDataBase) AddSecret(ctx context.Context, secret models.RawSecretData) error {
 	_, err := pg.conn.ExecContext(ctx,
 		"INSERT INTO secrets (user_id, secret_data) VALUES ($1, $2)",
@@ -62,6 +69,7 @@ func (pg *PostgresDataBase) AddSecret(ctx context.Context, secret models.RawSecr
 	return err
 }
 
+// GetSecrets функция для получение всех секретов пользователя
 func (pg *PostgresDataBase) GetSecrets(ctx context.Context, userID string) ([]models.RawSecretData, error) {
 	rows, err := pg.conn.QueryxContext(ctx, "SELECT id, user_id,secret_data FROM secrets WHERE user_id=$1 AND deleted_at IS NULL", userID)
 	if err != nil {
@@ -74,15 +82,12 @@ func (pg *PostgresDataBase) GetSecrets(ctx context.Context, userID string) ([]mo
 		if err != nil {
 			return nil, err
 		}
-		//sd, err := m.DecryptToSecretData()
-		//if err != nil {
-		//	return nil, err
-		//}
 		result = append(result, m)
 	}
 	return result, err
 }
 
+// DeleteSecret функция для удаления секрета пользователя
 func (pg *PostgresDataBase) DeleteSecret(ctx context.Context, secretID string, userID string) error {
 	_, err := pg.conn.ExecContext(ctx, `UPDATE secrets SET deleted_at = current_timestamp WHERE id = $1 AND user_id = $2`,
 		secretID, userID)

@@ -5,16 +5,19 @@ import (
 	"new_diplom/models"
 )
 
+// NewSecretService функция создания сервиса для работы с секретами
 func NewSecretService(db SecretRepoInterface) *SecretServices {
 	return &SecretServices{
 		db: db,
 	}
 }
 
+// SecretServices структура сервиса секретов
 type SecretServices struct {
 	db SecretRepoInterface
 }
 
+// AddSecret функция по созданию нового секрета
 func (ss *SecretServices) AddSecret(ctx context.Context, secret models.Secret) error {
 	rawSecret, err := models.NewRawSecretData(secret)
 	if err != nil {
@@ -23,6 +26,7 @@ func (ss *SecretServices) AddSecret(ctx context.Context, secret models.Secret) e
 	return ss.db.AddSecret(ctx, *rawSecret)
 }
 
+// GetSecrets функия по получению всех секретов пользователя
 func (ss *SecretServices) GetSecrets(ctx context.Context, userID string) ([]models.SecretData, error) {
 	rawSecrets, err := ss.db.GetSecrets(ctx, userID)
 	if err != nil {
@@ -39,6 +43,7 @@ func (ss *SecretServices) GetSecrets(ctx context.Context, userID string) ([]mode
 	return result, nil
 }
 
+// DeleteSecret функция удаления скрета
 func (ss *SecretServices) DeleteSecret(ctx context.Context, secretID string,
 	userID string) error {
 	return ss.db.DeleteSecret(ctx, secretID, userID)

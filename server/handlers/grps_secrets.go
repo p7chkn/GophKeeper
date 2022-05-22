@@ -9,17 +9,20 @@ import (
 	"new_diplom/pb"
 )
 
+// NewGrpcSecrets функция создания обраточка запросов для секретов
 func NewGrpcSecrets(secretService SecretServiceInterface) *GrpcSecrets {
 	return &GrpcSecrets{
 		secretService: secretService,
 	}
 }
 
+// GrpcSecrets структура для обраточика запросов для секретов
 type GrpcSecrets struct {
 	pb.UnimplementedSecretsServer
 	secretService SecretServiceInterface
 }
 
+// CreateSecret функция создания секрета
 func (gh *GrpcSecrets) CreateSecret(ctx context.Context, in *pb.CreateSecretRequest) (*pb.CreateSecretResponse, error) {
 	userID := getUserFromContext(ctx)
 	if userID == "" {
@@ -56,6 +59,7 @@ func (gh *GrpcSecrets) CreateSecret(ctx context.Context, in *pb.CreateSecretRequ
 	}, nil
 }
 
+// GetSecrets функция для возвращения всех секретов пользователя
 func (gh *GrpcSecrets) GetSecrets(ctx context.Context, in *pb.GetSecretsRequest) (*pb.GetSecretsResponse, error) {
 	userID := getUserFromContext(ctx)
 	if userID == "" {
@@ -100,8 +104,15 @@ func (gh *GrpcSecrets) GetSecrets(ctx context.Context, in *pb.GetSecretsRequest)
 	}, nil
 }
 
+// DeleteSecret функция для удаления секрета
 func (gh *GrpcSecrets) DeleteSecret(ctx context.Context, in *pb.DeleteSecretRequest) (*pb.DeleteSecretResponse, error) {
-	err := gh.secretService.DeleteSecret(ctx, in.SecretId, "") // TODO: logic for parse user
+	userID := getUserFromContext(ctx)
+	if userID == "" {
+		return &pb.DeleteSecretResponse{
+			Status: "unauthorized",
+		}, nil
+	}
+	err := gh.secretService.DeleteSecret(ctx, in.SecretId, userID)
 	if err != nil {
 		return &pb.DeleteSecretResponse{
 			Status: customerrors.ParseError(err),

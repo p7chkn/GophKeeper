@@ -1,3 +1,4 @@
+// Package loops пакет для хранения циклов взаимодействия
 package loops
 
 import (
@@ -9,10 +10,11 @@ import (
 )
 
 var (
-	AccessToken  = ""
-	RefreshToken = ""
+	accessToken  = ""
+	refreshToken = ""
 )
 
+// NewUserLoop функция создания структуры цикла взаимодейтсвия с пользователями
 func NewUserLoop(address string, userHandler *handlers.UserHandler) *UserLoop {
 	return &UserLoop{
 		address:     address,
@@ -20,12 +22,14 @@ func NewUserLoop(address string, userHandler *handlers.UserHandler) *UserLoop {
 	}
 }
 
+// UserLoop структра цикла взаимодействия с пользователем
 type UserLoop struct {
 	address       string
 	userHandler   *handlers.UserHandler
 	secretHandler *handlers.SecretHandler
 }
 
+// MainLoop функция запуска основного цикла
 func (ul *UserLoop) MainLoop(ctx context.Context) {
 	for {
 		fmt.Println("To login input l, to register input r, to quit input q:")
@@ -36,24 +40,24 @@ func (ul *UserLoop) MainLoop(ctx context.Context) {
 		}
 		switch {
 		case input == "r":
-			AccessToken, RefreshToken, err = ul.userHandler.RegisterUser(ctx)
+			accessToken, refreshToken, err = ul.userHandler.RegisterUser(ctx)
 			if err != nil {
 				fmt.Printf("Error with registration: %v \n", err)
 				continue
 			}
-			if AccessToken != "" && RefreshToken != "" {
-				ul.clientLoop(ctx, AccessToken, RefreshToken)
+			if accessToken != "" && refreshToken != "" {
+				ul.clientLoop(ctx, accessToken, refreshToken)
 			} else {
 				fmt.Println("Problem with register")
 			}
 		case input == "l":
-			AccessToken, RefreshToken, err = ul.userHandler.AuthUser(ctx)
+			accessToken, refreshToken, err = ul.userHandler.AuthUser(ctx)
 			if err != nil {
 				fmt.Println("Wrong login or password")
 				continue
 			}
-			if AccessToken != "" && RefreshToken != "" {
-				ul.clientLoop(ctx, AccessToken, RefreshToken)
+			if accessToken != "" && refreshToken != "" {
+				ul.clientLoop(ctx, accessToken, refreshToken)
 			} else {
 				fmt.Println("Problem with login")
 			}
