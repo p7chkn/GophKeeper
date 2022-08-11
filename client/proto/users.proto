@@ -1,0 +1,37 @@
+syntax = "proto3";
+package users;
+option go_package = "/pb";
+
+service Users {
+  rpc CreateUser (CreateUserRequest) returns (TokenResponse) {}
+  rpc AuthUser (AuthUserRequest) returns (TokenResponse) {}
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse) {}
+  rpc RefreshToken (RefreshTokenRequest) returns (TokenResponse) {}
+}
+
+message CreateUserRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message AuthUserRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message DeleteUserRequest {
+}
+
+message DeleteUserResponse {
+  string status = 1;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message TokenResponse {
+  string status = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+}
